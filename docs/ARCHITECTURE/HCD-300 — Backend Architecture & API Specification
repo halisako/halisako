@@ -1,0 +1,819 @@
+# HCD-300 — Backend Architecture & API Specification
+
+**Document ID:** HCD-300  
+**Title:** Backend Architecture & API Specification  
+**Category:** Architecture  
+**Version:** 1.1  
+**Status:** Approved for Sprint 1  
+**Owner:** Engineering Team  
+**Repository:** halisako  
+**Last Updated:** July 2026
+
+---
+
+# 1. Purpose
+
+This document defines the backend architecture of the Halisako platform.
+
+It serves as the engineering contract for implementing the backend and establishes the architectural principles that every future service must follow.
+
+This document covers:
+
+- Backend Architecture
+- Domain Boundaries
+- API Standards
+- Authentication
+- Database Design
+- Upload Pipeline
+- Job Orchestration
+- Experience Generation Pipeline
+- HXT Lifecycle
+- Deployment Architecture
+- Scalability Strategy
+
+---
+
+# 2. Vision
+
+Halisako is not a single AI application.
+
+It is a platform for transforming structured human inputs into expressive digital experiences.
+
+The backend therefore must:
+
+- support multiple products
+- remain product-agnostic
+- isolate product logic
+- centralize orchestration
+- allow new products to be added without modifying the platform core.
+
+---
+
+# 3. Architectural Principles
+
+The backend follows five guiding principles.
+
+## 3.1 API First
+
+Everything communicates through well-defined APIs.
+
+---
+
+## 3.2 Product Isolation
+
+Every product owns only its own business logic.
+
+Example:
+
+Chess2Fight knows nothing about Song2Dance.
+
+Song2Dance knows nothing about Chess.
+
+---
+
+## 3.3 Shared Platform
+
+Authentication, uploads, jobs, orchestration and storage are platform capabilities shared by every product.
+
+---
+
+## 3.4 HXT as the Universal Language
+
+No renderer communicates directly with product analyzers.
+
+Every product generates HXT.
+
+Every renderer consumes HXT.
+
+---
+
+## 3.5 Asynchronous by Default
+
+Long-running operations never block API requests.
+
+Uploads always return immediately.
+
+Background workers perform processing.
+
+---
+
+# 4. High-Level Architecture
+
+```
+                        Browser
+                           │
+                           ▼
+                    Next.js Frontend
+                           │
+                    REST / HTTPS API
+                           │
+                           ▼
+                     FastAPI Backend
+                           │
+         ┌─────────────────┼─────────────────┐
+         │                 │                 │
+         ▼                 ▼                 ▼
+    PostgreSQL       Object Storage      Job Queue
+                           │
+                           ▼
+                Experience Orchestrator
+                           │
+          ┌────────────────┴───────────────┐
+          │                                │
+          ▼                                ▼
+   Chess2Fight Engine              Song2Dance Engine
+          │                                │
+          └──────────────┬─────────────────┘
+                         ▼
+                    HXT Generator
+                         │
+                         ▼
+                     Stored HXT
+```
+
+---
+
+# 5. Technology Stack
+
+## Frontend
+
+- Next.js 15
+- React 19
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+
+## Backend
+
+- FastAPI
+- Python 3.12
+- SQLAlchemy 2
+- Alembic
+- Pydantic v2
+
+## Database
+
+- PostgreSQL
+
+## Queue
+
+Sprint 1
+
+- FastAPI Background Tasks
+
+Future
+
+- Celery
+- Redis
+
+## Storage
+
+Sprint 1
+
+- Local Filesystem
+
+Future
+
+- Cloudflare R2
+- Amazon S3
+
+## Chess
+
+- python-chess
+- Stockfish
+
+---
+
+# 6. Backend Repository Structure
+
+```
+halisako-api/
+
+app/
+
+│
+├── api/
+│     └── v1/
+│
+├── auth/
+│
+├── users/
+│
+├── projects/
+│
+├── uploads/
+│
+├── jobs/
+│
+├── orchestration/
+│     ├── hxt/
+│     ├── planner/
+│     ├── timeline/
+│     └── workflow/
+│
+├── products/
+│
+│     ├── chess2fight/
+│     │      ├── parser/
+│     │      ├── analyzer/
+│     │      ├── planner/
+│     │      ├── mapper/
+│     │      └── exporter/
+│     │
+│     └── song2dance/
+│            ├── analyzer/
+│            ├── planner/
+│            ├── choreography/
+│            └── exporter/
+│
+├── shared/
+│     ├── storage/
+│     ├── logging/
+│     ├── events/
+│     ├── config/
+│     └── security/
+│
+├── db/
+│
+├── middleware/
+│
+├── models/
+│
+├── schemas/
+│
+├── utils/
+│
+└── main.py
+
+tests/
+
+alembic/
+
+requirements.txt
+```
+
+---
+
+# 7. Domain Responsibilities
+
+## Platform Domains
+
+These modules belong to Halisako itself.
+
+- Authentication
+- Users
+- Projects
+- Uploads
+- Jobs
+- Orchestration
+- HXT
+- Storage
+- Logging
+
+These should never contain Chess-specific logic.
+
+---
+
+## Product Domains
+
+Products own:
+
+- parsing
+- analysis
+- planning
+- mapping
+
+Products never perform:
+
+- authentication
+- uploads
+- user management
+- orchestration
+
+---
+
+# 8. Authentication
+
+Authentication uses JWT.
+
+Flow
+
+```
+Register
+
+↓
+
+Login
+
+↓
+
+Access Token
+
+↓
+
+Authenticated Requests
+```
+
+Future
+
+- Google OAuth
+- GitHub OAuth
+
+---
+
+# 9. Core Entities
+
+## User
+
+```
+id
+email
+password_hash
+full_name
+created_at
+last_login
+status
+```
+
+---
+
+## Project
+
+Represents one creative experience.
+
+```
+id
+user_id
+name
+experience_type
+status
+created_at
+updated_at
+```
+
+---
+
+## Upload
+
+```
+id
+project_id
+filename
+file_type
+size
+storage_path
+uploaded_at
+```
+
+---
+
+## Job
+
+```
+id
+project_id
+status
+progress
+started_at
+completed_at
+error_message
+```
+
+---
+
+## HXT
+
+```
+id
+project_id
+version
+timeline_json
+created_at
+```
+
+---
+
+# 10. REST API
+
+Base URL
+
+```
+/api/v1
+```
+
+---
+
+## Authentication
+
+POST
+
+```
+/auth/register
+```
+
+POST
+
+```
+/auth/login
+```
+
+GET
+
+```
+/auth/me
+```
+
+---
+
+## Projects
+
+GET
+
+```
+/projects
+```
+
+POST
+
+```
+/projects
+```
+
+GET
+
+```
+/projects/{id}
+```
+
+DELETE
+
+```
+/projects/{id}
+```
+
+---
+
+## Upload
+
+POST
+
+```
+/projects/{id}/upload
+```
+
+Returns
+
+```json
+{
+  "upload_id":"...",
+  "job_id":"...",
+  "status":"queued"
+}
+```
+
+---
+
+## Jobs
+
+GET
+
+```
+/jobs/{id}
+```
+
+Returns
+
+```json
+{
+  "status":"running",
+  "progress":35
+}
+```
+
+---
+
+## HXT
+
+GET
+
+```
+/hxt/{project_id}
+```
+
+Returns
+
+Complete HXT document.
+
+---
+
+# 11. Upload Processing Pipeline
+
+```
+Upload
+
+↓
+
+Validate
+
+↓
+
+Store File
+
+↓
+
+Create Upload Record
+
+↓
+
+Create Job
+
+↓
+
+Return Response
+
+↓
+
+Worker Starts
+```
+
+---
+
+# 12. Chess2Fight Processing Pipeline
+
+```
+PGN
+
+↓
+
+Parser
+
+↓
+
+Stockfish
+
+↓
+
+Move Analysis
+
+↓
+
+Intent Planner
+
+↓
+
+Combat Planner
+
+↓
+
+HXT Builder
+
+↓
+
+Persist HXT
+```
+
+---
+
+# 13. Song2Dance Pipeline
+
+```
+Audio
+
+↓
+
+Audio Analysis
+
+↓
+
+Rhythm Detection
+
+↓
+
+Intent Planner
+
+↓
+
+Choreography Planner
+
+↓
+
+HXT Builder
+
+↓
+
+Persist HXT
+```
+
+---
+
+# 14. Orchestration Pipeline
+
+Every product follows exactly the same lifecycle.
+
+```
+Input
+
+↓
+
+Parser
+
+↓
+
+Analyzer
+
+↓
+
+Intent
+
+↓
+
+Planner
+
+↓
+
+HXT
+
+↓
+
+Renderer
+```
+
+This pipeline is the heart of Halisako.
+
+---
+
+# 15. API Response Standard
+
+Success
+
+```json
+{
+    "success": true,
+    "data": {}
+}
+```
+
+Failure
+
+```json
+{
+    "success": false,
+    "error": {
+        "code":"",
+        "message":""
+    }
+}
+```
+
+---
+
+# 16. Security
+
+- JWT
+- Argon2 password hashing
+- HTTPS
+- File validation
+- MIME validation
+- Upload size limits
+- Input validation
+- Audit logging
+
+---
+
+# 17. Logging
+
+Every request logs:
+
+- Request ID
+- User ID
+- Route
+- Processing Time
+- HTTP Status
+- Job ID (if applicable)
+
+---
+
+# 18. Configuration
+
+```
+DATABASE_URL
+
+JWT_SECRET_KEY
+
+JWT_ALGORITHM
+
+ACCESS_TOKEN_EXPIRE_MINUTES
+
+UPLOAD_DIRECTORY
+
+MAX_UPLOAD_SIZE
+
+STOCKFISH_PATH
+```
+
+---
+
+# 19. Deployment
+
+Development
+
+```
+Docker Compose
+
+↓
+
+FastAPI
+
+↓
+
+PostgreSQL
+```
+
+Production
+
+```
+Load Balancer
+
+↓
+
+FastAPI
+
+↓
+
+Redis
+
+↓
+
+Worker Pool
+
+↓
+
+PostgreSQL
+```
+
+---
+
+# 20. Future Products
+
+The architecture intentionally supports future products.
+
+Examples
+
+- Chess2Fight
+- Song2Dance
+- Story2Scene
+- Sports2Cinema
+- Text2Animation
+- Presentation2Experience
+
+Each contributes only product-specific analyzers and planners while reusing the Halisako Platform.
+
+---
+
+# 21. Sprint 1 Definition of Done
+
+Sprint 1 is complete when the following workflow executes successfully.
+
+```
+User Login
+
+↓
+
+Create Project
+
+↓
+
+Upload PGN
+
+↓
+
+Job Created
+
+↓
+
+Chess Analysis
+
+↓
+
+Generate HXT
+
+↓
+
+View HXT Timeline
+```
+
+No rendering engine is required for Sprint 1.
+
+The primary deliverable is a functioning orchestration pipeline that transforms a chess game into an HXT representation.
+
+---
+
+# 22. Engineering Notes
+
+The backend shall never be tightly coupled to any specific AI model, renderer, or product.
+
+Every new experience type must integrate by implementing the standard orchestration lifecycle:
+
+Input → Parser → Analyzer → Intent → Planner → HXT
+
+This principle ensures that Halisako remains an extensible orchestration platform rather than a collection of unrelated AI applications.
