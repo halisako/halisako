@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Design tokens — HSL mirror of lib/theme.ts
+ * ------------------------------------------------------------------
+ * Every value below corresponds 1:1 to a hex in lib/theme.ts
+ * (see `hslReference` there for the mapping). Consumed by
+ * tailwind.config.ts and shadcn/ui primitives via hsl(var(--token)).
+ */
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;        /* #FAFAFA */
+    --foreground: 0 0% 7%;         /* #111111 */
+
+    --card: 0 0% 100%;             /* #FFFFFF */
+    --card-foreground: 0 0% 7%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 7%;
+
+    --primary: 0 0% 7%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 88%;
+    --secondary-foreground: 0 0% 7%;
+
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 35%; /* #5A5A5A */
+
+    --accent: 48 78% 80%;          /* gold-accent #F4E4A6 */
+    --accent-foreground: 0 0% 7%;
+
+    --destructive: 3 71% 41%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 93%;            /* #ECECEC */
+    --input: 0 0% 93%;
+    --ring: 43 89% 38%;            /* gold-primary */
+
+    --radius: 1rem;
+
+    /* Brand-specific tokens (beyond the shadcn base set) */
+    --gold-primary: 43 89% 38%;    /* #B8860B */
+    --gold-secondary: 46 65% 52%;  /* #D4AF37 */
+    --gold-accent: 48 78% 80%;     /* #F4E4A6 */
+    --silver: 0 0% 75%;            /* #C0C0C0 */
+    --silver-light: 0 0% 85%;      /* #D9D9D9 */
+  }
+
+  .dark {
+    --background: 40 16% 4%;       /* #0B0A08 */
+    --foreground: 42 39% 94%;      /* #F5F1E8 */
+
+    --card: 40 9% 7%;              /* #131210 */
+    --card-foreground: 42 39% 94%;
+
+    --popover: 40 9% 7%;
+    --popover-foreground: 42 39% 94%;
+
+    --primary: 42 39% 94%;
+    --primary-foreground: 40 16% 4%;
+
+    --secondary: 40 8% 16%;
+    --secondary-foreground: 42 39% 94%;
+
+    --muted: 40 8% 15%;
+    --muted-foreground: 40 9% 62%; /* #A8A296 */
+
+    --accent: 44 48% 20%;           /* dark gold accent #4A3D1A */
+    --accent-foreground: 42 39% 94%;
+
+    --destructive: 5 56% 31%;
+    --destructive-foreground: 42 39% 94%;
+
+    --border: 42 17% 12%;           /* #232019 */
+    --input: 42 17% 12%;
+    --ring: 46 65% 52%;
+
+    --gold-primary: 46 65% 52%;
+    --gold-secondary: 46 70% 60%;
+    --gold-accent: 44 48% 20%;
+    --silver: 0 0% 60%;
+    --silver-light: 0 0% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: hsl(var(--gold-accent));
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,85 @@
+.flowPath {
+  stroke-dasharray: 8 10;
+  animation: flowMove 6s linear infinite;
+}
+@keyframes flowMove {
+  to {
+    stroke-dashoffset: -180;
+  }
+}
+
+.particleA {
+  offset-path: path("M 40,120 C 160,60 260,60 380,150");
+  animation: travel 4.5s linear infinite;
+}
+.particleB {
+  offset-path: path("M 40,260 C 160,300 260,260 380,170");
+  animation: travel 5.5s linear infinite;
+}
+.particleC {
+  offset-path: path("M 40,190 C 180,190 240,180 380,160");
+  animation: travel 5s linear infinite 0.8s;
+}
+@keyframes travel {
+  from {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  to {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+.corePulse {
+  animation: corePulse 3.2s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes corePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+.coreRing {
+  animation: ringExpand 3.2s ease-out infinite;
+  transform-origin: center;
+}
+@keyframes ringExpand {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flowPath,
+  .particleA,
+  .particleB,
+  .particleC,
+  .corePulse,
+  .coreRing {
+    animation: none;
+  }
+  .particleA,
+  .particleB,
+  .particleC {
+    opacity: 0;
+  }
+}
