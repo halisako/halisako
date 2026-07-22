@@ -191,18 +191,26 @@ that `tailwind.config.ts` maps to `font-display`, `font-sans`, and
 `font-mono`. Both the marketing site and Chess2Fight use the same
 three typefaces — only the color scheme changes between them.
 
-## Mock endpoints
+## API routes
 
-Two API routes exist, both intentionally stubbed:
+- `app/api/waitlist/route.ts` — still a stub. Validates and logs
+  early-access signups; has a `// TODO` marking where real persistence
+  would go.
+- `app/api/chess2fight/generate/route.ts` — **has two modes.** With no
+  `CHESS2FIGHT_API_URL` env var set, it behaves exactly as before
+  (randomly-picked mock `GenerationResult`, ~1.2s simulated delay). Set
+  `CHESS2FIGHT_API_URL` to a deployed instance of the real backend (see
+  `/backend` — a separate FastAPI service, not part of this Next.js
+  app) and this route forwards the PGN there instead, mapping its
+  nested response (`fight_story.fight_style`, etc.) into the same flat
+  `GenerationResult` shape the UI already renders. No component
+  changes needed either way.
 
-- `app/api/waitlist/route.ts` — validates and logs early-access
-  signups.
-- `app/api/chess2fight/generate/route.ts` — validates a PGN and
-  returns a randomly-picked mock `GenerationResult`.
-
-Per the brief, there's no auth, no database, no payments — just these
-two mocks, each with a `// TODO` marking where real persistence or a
-real pipeline would go.
+  If the backend URL is configured but unreachable at request time,
+  this deliberately returns a real error rather than silently falling
+  back to mock data — showing fabricated results for someone's actual
+  pasted PGN would be worse than an honest "couldn't reach the
+  generation service" message.
 
 ## Deploying to Vercel
 
