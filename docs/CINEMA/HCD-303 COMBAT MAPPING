@@ -1,0 +1,535 @@
+HCD-303
+Combat Mapping Library Specification
+
+Document ID: HCD-303
+Version: 1.0
+Status: Draft
+Sprint: Sprint 2 — Cinematic Intelligence Layer
+System: Halisako Core
+Module: Cinematic Engine
+Consumer: Chess2Fight
+Author: Halisako Engineering
+Date: 2026-07-23
+
+1. Purpose
+
+The Combat Mapping Library (CML) defines the transformation rules between abstract chess events and cinematic combat actions.
+
+The library provides the vocabulary required for the Cinematic Engine to translate:
+
+Chess Intelligence
+        |
+        v
+Chess Event
+        |
+        v
+Combat Mapping Library
+        |
+        v
+Cinematic Action
+
+Example:
+
+Input:
+
+Knight captures bishop
+
+Output:
+
+Knight performs aerial assassination combo
+2. Design Philosophy
+
+The Combat Mapping Library follows three principles:
+
+2.1 Preserve Chess Meaning
+
+A cinematic action must represent the strategic meaning of the move.
+
+Example:
+
+A knight fork is not simply an attack.
+
+It represents:
+
+surprise
+tactical superiority
+multi-target pressure
+
+Therefore:
+
+Knight Fork
+      |
+      v
+Assassin Combo Attack
+2.2 Preserve Piece Identity
+
+Every chess piece has a unique combat personality.
+
+A queen attack and pawn attack should never feel identical.
+
+2.3 Allow Multiple Interpretations
+
+The same chess event can produce different cinematic outcomes.
+
+Example:
+
+Queen capture:
+
+Possible outputs:
+
+Dominance:
+
+Queen destroys enemy instantly
+
+or:
+
+Revenge:
+
+Queen eliminates the enemy after taking damage
+3. Mapping Architecture
+                 HXT Event
+
+                     |
+                     v
+
+          +--------------------+
+          | Event Mapper       |
+          +--------------------+
+
+                     |
+
+                     v
+
+          +--------------------+
+          | Piece Identity     |
+          +--------------------+
+
+                     |
+
+                     v
+
+          +--------------------+
+          | Action Generator   |
+          +--------------------+
+
+                     |
+
+                     v
+
+                  HCE Scene
+
+4. Combat Action Taxonomy
+
+The library defines six primary action classes.
+
+4.1 Movement Actions
+
+Used for non-combat chess movement.
+
+Examples:
+
+Chess Event	Cinematic Action
+Pawn advance	formation advance
+Knight movement	teleport dash
+Bishop movement	energy glide
+Rook movement	battlefield march
+Queen movement	royal movement
+King movement	tactical retreat
+
+Example:
+
+{
+"type":"movement",
+
+"action":
+"teleport_dash",
+
+"style":
+"assassin"
+}
+4.2 Attack Actions
+
+Used for offensive interactions.
+
+Chess Event	Action
+Pawn capture	soldier strike
+Knight capture	assassination
+Bishop capture	energy blade
+Rook capture	heavy impact
+Queen capture	ultimate execution
+King capture	desperate attack
+4.3 Defensive Actions
+
+Used for protection.
+
+Chess Event	Action
+Block	shield formation
+Castle	fortress deployment
+King move	survival maneuver
+4.4 Special Actions
+
+Rare strategic moments.
+
+Chess Event	Action
+Sacrifice	heroic last stand
+Promotion	evolution
+Fork	combo attack
+Pin	immobilization
+Skewer	penetration attack
+4.5 Victory Actions
+Event	Cinematic Result
+Checkmate	final execution
+Resignation	surrender scene
+Timeout	collapse scene
+5. Piece Combat Profiles
+5.1 Pawn
+Identity
+
+Class:
+
+Soldier
+
+Attributes:
+
+Power: Low
+Speed: Medium
+Growth: High
+
+Actions:
+
+Event	Animation
+Move	advance
+Capture	spear strike
+Promotion	transformation
+
+Special:
+
+Promotion triggers:
+
+Pawn Awakening Scene
+5.2 Knight
+Identity
+
+Class:
+
+Assassin
+
+Attributes:
+
+Power: Medium
+Speed: Very High
+Mobility: Extreme
+
+Actions:
+
+Event	Animation
+Move	teleport dash
+Capture	assassination strike
+Fork	multi-combo
+
+Signature:
+
+Shadow Step
+5.3 Bishop
+Identity
+
+Class:
+
+Mage
+
+Attributes:
+
+Power: Medium
+Range: High
+Precision: High
+
+Actions:
+
+Event	Animation
+Move	energy movement
+Capture	magical strike
+Diagonal attack	beam attack
+
+Signature:
+
+Sacred Ray
+5.4 Rook
+Identity
+
+Class:
+
+Tank
+
+Attributes:
+
+Power: High
+Speed: Low
+Defense: High
+
+Actions:
+
+Event	Animation
+Move	heavy march
+Capture	crushing attack
+
+Signature:
+
+Fortress Breaker
+5.5 Queen
+Identity
+
+Class:
+
+Legendary Fighter
+
+Attributes:
+
+Power: Extreme
+Speed: High
+Range: Extreme
+
+Actions:
+
+Event	Animation
+Move	royal teleport
+Capture	ultimate attack
+Check	domination aura
+
+Signature:
+
+Divine Execution
+5.6 King
+Identity
+
+Class:
+
+Commander
+
+Attributes:
+
+Power: Medium
+Importance: Maximum
+
+Actions:
+
+Event	Animation
+Move	defensive maneuver
+Check response	survival mode
+
+Signature:
+
+Last Stand
+6. Tactical Event Mapping
+
+This section maps chess strategy into cinematic narrative.
+
+Fork
+
+Chess Meaning:
+
+One piece attacks multiple targets.
+
+Cinematic:
+
+Multi-target combo attack
+
+Example:
+
+Knight attacks Queen + Rook:
+
+{
+"action":
+"assassin_combo",
+
+"targets":2
+}
+Pin
+
+Chess Meaning:
+
+Piece cannot move.
+
+Cinematic:
+
+Immobilization attack
+Sacrifice
+
+Chess Meaning:
+
+Material loss for strategic advantage.
+
+Cinematic:
+
+Hero sacrifice
+Gambit
+
+Chess Meaning:
+
+Early material investment.
+
+Cinematic:
+
+Risk initiation scene
+Counterattack
+
+Chess Meaning:
+
+Defensive reversal.
+
+Cinematic:
+
+Momentum reversal
+7. Momentum System
+
+The Combat Mapping Library introduces cinematic momentum.
+
+Every action modifies:
+
+Momentum Score
+
+Range:
+
+-100 → +100
+
+Example:
+
+White loses queen:
+
+Momentum:
+-50
+
+White delivers unexpected mate:
+
+Momentum:
++100
+
+Momentum affects:
+
+camera intensity
+music
+effects
+character behavior
+8. Action Schema
+
+All mappings output:
+
+{
+"combat_action_id":
+"knight_fork",
+
+"actor":
+"white_knight",
+
+"action":
+"shadow_combo",
+
+"impact":
+"high",
+
+"emotion":
+"surprise",
+
+"momentum_change":
+25
+}
+9. Version 1 Mapping Library
+
+Initial implementation contains:
+
+Movement
+
+10 mappings
+
+Captures
+
+12 mappings
+
+Tactical Events
+
+15 mappings
+
+Endgame Events
+
+8 mappings
+
+Special Events
+
+5 mappings
+
+Total:
+
+50+ cinematic mappings
+10. Implementation Structure
+
+Repository location:
+
+backend/
+|
+└── cinema/
+    |
+    ├── mappings/
+    │
+    ├── combat_library.json
+    │
+    ├── piece_profiles.json
+    │
+    └── tactical_events.json
+
+11. Example Mapping Entry
+{
+"id":
+"queen_capture",
+
+"conditions":{
+"piece":
+"queen",
+
+"event":
+"capture"
+},
+
+"output":{
+"action":
+"divine_execution",
+
+"camera":
+"impact_zoom",
+
+"effects":
+"energy_wave",
+
+"emotion":
+"dominance"
+}
+}
+12. Future AI Expansion
+
+The Combat Mapping Library becomes the grounding layer for AI creativity.
+
+Future:
+
+Rules Engine
+      +
+LLM Director
+      |
+      v
+Creative Cinematic Variation
+
+The AI can invent:
+
+dialogue
+choreography variations
+camera choices
+
+but cannot violate chess identity.
+
+13. Sprint 2 Completion Criteria
+
+HCD-303 is complete when:
+
+✅ Every chess piece has a combat identity
+✅ Major chess events have cinematic equivalents
+✅ Mapping rules are machine-readable
+✅ Engine can generate deterministic scenes
+✅ AI layer can later enhance output
+
