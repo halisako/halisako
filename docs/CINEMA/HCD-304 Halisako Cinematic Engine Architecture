@@ -1,0 +1,666 @@
+# HCD-304 — Halisako Cinematic Engine Architecture
+
+**Document ID:** HCD-304  
+**Subsystem:** CINEMA  
+**Status:** Draft  
+**Sprint:** Sprint 2 — Cinematic Intelligence Layer  
+**Depends On:**
+
+- HCD-301 — Cinematic Engine Specification
+- HCD-302 — HXT to HCE Transformation
+- HCD-303 — Combat Mapping Specification
+
+---
+
+# 1. Purpose
+
+The Halisako Cinematic Engine (HCE) is the transformation layer responsible for converting structured battle intelligence into cinematic instructions suitable for rendering, animation, and future generative video pipelines.
+
+The Cinematic Engine does not analyze chess.
+
+The Cinematic Engine does not generate narrative.
+
+The Cinematic Engine does not determine combat outcomes.
+
+Those responsibilities belong to upstream intelligence layers.
+
+HCE receives already processed intelligence and transforms it into:
+
+- scenes
+- shots
+- camera directions
+- pacing
+- lighting
+- animation directives
+- visual transitions
+
+The output is a machine-readable cinematic sequence.
+
+---
+
+# 2. System Position
+
+The complete Chess2Fight pipeline becomes:
+
+```
+                PGN INPUT
+                    |
+                    v
+          Metadata Normalizer
+                    |
+                    v
+            Chess Analyzer
+                    |
+                    v
+          Combat Intelligence
+                    |
+                    v
+          Battle Intelligence
+                    |
+                    v
+            Style Engine
+                    |
+                    v
+        Battle Mode Intelligence
+                    |
+                    v
+        Narrative Generator
+                    |
+                    v
+        Halisako Cinematic Engine
+                    |
+                    v
+          Rendering Pipeline
+                    |
+                    v
+              Final Video
+```
+
+---
+
+# 3. Design Principle
+
+## Intelligence First, Rendering Second
+
+HCE does not create images or video.
+
+It creates a cinematic blueprint.
+
+The renderer is responsible for:
+
+- 3D assets
+- animation execution
+- character models
+- effects
+- video generation
+
+The Cinematic Engine decides:
+
+- what happens
+- when it happens
+- how it should be viewed
+
+---
+
+# 4. Core Responsibilities
+
+## 4.1 Scene Generation
+
+Convert combat sequences into cinematic scenes.
+
+Example:
+
+Input:
+
+```
+Moves 1-4
+
+Low intensity
+Opening deployment
+Both sides developing forces
+```
+
+Output:
+
+```
+Scene:
+
+Title:
+The Opening Deployment
+
+Duration:
+8 seconds
+
+Purpose:
+Introduce opposing armies
+
+Camera:
+Wide battlefield shot
+```
+
+---
+
+# 4.2 Shot Generation
+
+Scenes are broken into individual camera shots.
+
+Example:
+
+```
+Scene:
+Final Assault
+
+Shots:
+
+1.
+Wide shot:
+The battlefield collapses
+
+2.
+Tracking shot:
+The attacking force advances
+
+3.
+Close shot:
+The final strike lands
+
+4.
+Aftermath:
+The battlefield becomes silent
+```
+
+---
+
+# 4.3 Cinematic Compression
+
+Chess contains many moves.
+
+Movies contain limited scenes.
+
+Therefore HCE must compress:
+
+```
+39 chess plies
+
+        |
+
+10-15 cinematic shots
+```
+
+The engine must prioritize:
+
+- high intensity events
+- tactical moments
+- turning points
+- sacrifices
+- finishing strikes
+
+Low-value moves are grouped.
+
+---
+
+# 5. Architectural Components
+
+## 5.1 Scene Builder
+
+Responsible for grouping combat events.
+
+Input:
+
+```
+CombatEvent[]
+```
+
+Output:
+
+```
+Scene[]
+```
+
+Grouping signals:
+
+- intensity
+- event type
+- move proximity
+- battle phase
+
+
+---
+
+## 5.2 Shot Director
+
+Responsible for selecting camera language.
+
+Input:
+
+```
+Scene
++
+Style Profile
++
+Battle Mode
+```
+
+Output:
+
+```
+Shot[]
+```
+
+---
+
+## 5.3 Camera System
+
+Defines camera behavior.
+
+Supported directives:
+
+```
+wide_establishing
+
+tracking
+
+close_up
+
+extreme_close_up
+
+aerial
+
+slow_motion
+
+impact_shot
+
+aftermath
+```
+
+---
+
+## 5.4 Lighting Director
+
+Uses style intelligence.
+
+Examples:
+
+Fantasy:
+
+```
+torch light
+magical glow
+storm atmosphere
+```
+
+Anime:
+
+```
+energy bloom
+speed lines
+dramatic contrast
+```
+
+Sci-fi:
+
+```
+holographic lighting
+neon atmosphere
+```
+
+---
+
+## 5.5 Animation Director
+
+Maps combat events into animation instructions.
+
+Example:
+
+Input:
+
+```
+event_type:
+finishing_strike
+```
+
+Output:
+
+```
+animation:
+ultimate_attack
+
+camera:
+impact_zoom
+
+effect:
+energy explosion
+```
+
+---
+
+# 6. Data Contracts
+
+## CinematicSequence
+
+The primary output object.
+
+Example:
+
+```json
+{
+"id":"battle_001",
+
+"duration_seconds":78,
+
+"scenes":[
+
+{
+"id":"scene_01",
+
+"title":"The Opening Deployment",
+
+"duration":8,
+
+"shots":[]
+}
+
+]
+
+}
+```
+
+---
+
+# 7. Core Schemas
+
+## Shot
+
+Represents one camera sequence.
+
+Fields:
+
+```
+shot_id
+
+scene_id
+
+duration
+
+camera_type
+
+camera_motion
+
+location
+
+characters
+
+combat_event
+
+visual_description
+
+animation_directive
+
+effects
+
+```
+
+---
+
+## Scene
+
+Represents a cinematic segment.
+
+Fields:
+
+```
+scene_id
+
+title
+
+purpose
+
+start_move
+
+end_move
+
+duration
+
+shots
+
+```
+
+---
+
+## CinematicSequence
+
+Represents the complete movie blueprint.
+
+Fields:
+
+```
+sequence_id
+
+battle_metadata
+
+duration
+
+scenes
+
+```
+
+---
+
+# 8. Cinematic Decision Logic
+
+The engine uses priority scoring.
+
+Priority:
+
+```
+Finishing Strike
+        |
+        v
+Major Tactical Event
+        |
+        v
+Sacrifice
+        |
+        v
+Breakthrough Attack
+        |
+        v
+Checks
+        |
+        v
+Strategic Movement
+```
+
+High priority events receive:
+
+- dedicated shots
+- close cameras
+- longer duration
+- stronger effects
+
+---
+
+# 9. Example Transformation
+
+Combat Event:
+
+```json
+{
+"type":"finishing_strike",
+"move":"20.Bxf6#",
+"intensity":10
+}
+```
+
+Cinematic Output:
+
+```json
+{
+"shot":
+
+{
+"type":"impact",
+
+"camera":
+"extreme_close_up",
+
+"duration":
+5,
+
+"animation":
+"final_magic_strike",
+
+"description":
+"The mage channels all remaining power into the final blow"
+}
+
+}
+```
+
+---
+
+# 10. Integration Contract
+
+Current orchestrator:
+
+```
+Analysis
+
+Combat Intelligence
+
+Battle Intelligence
+
+Style Profile
+
+Battle Mode
+
+Narrative
+
+Video Placeholder
+```
+
+New orchestrator:
+
+```
+Analysis
+
+Combat Intelligence
+
+Battle Intelligence
+
+Style Profile
+
+Battle Mode
+
+Narrative
+
+Cinematic Sequence
+
+Video Placeholder
+```
+
+---
+
+# 11. Non-Goals
+
+HCE does NOT:
+
+- render video
+- create 3D models
+- generate voices
+- generate music
+- replace narrative generation
+- perform chess analysis
+
+---
+
+# 12. Future Extensions
+
+Possible future modules:
+
+```
+cinematic_memory.py
+
+asset_selector.py
+
+character_director.py
+
+voice_director.py
+
+music_director.py
+
+renderer_adapter.py
+```
+
+---
+
+# 13. Sprint 2 Implementation Plan
+
+## Phase 1
+
+Create:
+
+```
+cinematic_schemas.py
+```
+
+Define:
+
+- Shot
+- Scene
+- CinematicSequence
+
+
+## Phase 2
+
+Create:
+
+```
+cinematic_engine.py
+```
+
+Implement:
+
+```
+generate_cinematic_sequence()
+```
+
+
+## Phase 3
+
+Integrate:
+
+```
+FightOrchestrator
+```
+
+Replace:
+
+```
+VideoPlaceholder only
+```
+
+with:
+
+```
+CinematicSequence
++
+VideoPlaceholder
+```
+
+---
+
+# 14. Completion Criteria
+
+HCE Sprint 2 milestone is complete when:
+
+- A PGN can produce a CinematicSequence
+- Multiple chess moves compress into cinematic scenes
+- High-impact moments receive dedicated shots
+- Style profile influences camera and effects
+- Battle mode influences scale
+- Output is renderer-ready JSON
+
+---
+
+# End of HCD-304
